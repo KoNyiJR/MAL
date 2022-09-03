@@ -1,53 +1,81 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-<title>KN Tunnel VPN</title>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-<link rel="stylesheet" href="css/main.css">
-<style>
-.materialBtn {
-background: #169F1B;
-}
-</style>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="assets/stylesheets/estilo.css">
+	<link rel="stylesheet" href="assets/stylesheets/bootstrap.min.css">
 </head>
-<main id="main">
-<header id="header" class="w3-card-4 w3-green">
-<center><h3> KN Tunnel APP (V 3.0.1) </h3></center>
-</header>
-<div class="content">
-<div class="w3-center">
-<figure>
-<img src="https://github.com/KoNyiJR/MAL/raw/main/Picsart_22-02-08_09-44-00-615.jpg"
-alt="Avatar" style="height:180px;width:280px;">
-<hr>
-<p>👇👇👇👇</p>
-<a href="https://github.com/KoNyiJR/MAL/blob/main/KN%20Tunnel%20V3.0.1.apk?raw=true">
-<button class="w3-button w3-green">Download Now</button></a>
-<hr>
-<figcaption><h3>♥FreeNet For MM♥</h3>
-<p>•Mytel Free Movie √√</p>
-<p>•18 Plus Movie √√</p>
-<p>•Mectel Bill0 | MB 0 √√</p>
-<p>•Dtac Bill0 | MB 0 √√</p>
-<p>•True Bill0 | MB 0 √√</p>
-<p>•Auto VPN Server Update √√</p>
-<p>• Othet SIM Bill စားသက်သာမည် √√</p>
-</figcaption>
-</figure>
-<hr>
+<body>
+	<center>
+		<h3>M3DU Downloader</h3>
+	</center>
+	<table style="width:100%">
+		<tr>
+			<td style="width:95px">
+				<label>M3U8 URL:<label>
+			</td>
+			<td>
+				<input type="text" id="url" class="form-control">
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<label>Numero</label>
+			</td>
+			<td>
+				<input type="text" id="numero" class="form-control">
+			</td>
+		</tr>
+	</table>
+	<br>
+	<button id="convertir" class="btn btn-success">DESCARGAR</button>
+	<button id="limpiar" class="btn btn-primary">LIMPIAR</button>
+	<div>
+		<div id="result"></div>
+	</div>
+	<script type="text/javascript" src="assets/javascripts/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript">
+		var ffmpeg = require('fluent-ffmpeg');
+		var command = ffmpeg();
+		
+		$(function(){
+			$("#convertir").on("click", function()
+			{
+				var URL 	= $("#url").val();
+				var Numero 	= $("#numero").val();
 
-<p>👇👇👇👇👇👇</p><p>App တစ်ခု ထဲ နဲ့ အကုန် လုံးကိုအသုံးပြု ချင်ရင်တော့ KN Tunnel.apk ( Version 3.0.1)
-ကို Down ဆွဲ အသုံးပြု လိုက်ပါ။</p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> ® KoNyiJR </p>
-  
-</div>
-</div>
-</main>
+				$("#url").val("");
+				$("#numero").val(parseInt(Numero)+1);
+				$("#result").append("<div id='video"+Numero+"' class='video-item dashed'>Inicio de descarga</div>");
+
+				var command = ffmpeg(URL)
+					.videoCodec('libx264')
+  					.audioCodec('libmp3lame')
+					.format('mp4')
+					.on('start', function(commandLine) {
+						console.log('Spawned Ffmpeg with command: ' + commandLine);
+					})
+					.on('progress', function(progress) {
+						console.log('Processing: ' + progress.percent + '% done');
+						$("#video"+Numero).html('Descargando: video'+Numero+" "+progress.percent.toFixed(2)+'% <span></span>');
+						$("#video"+Numero+" span").html('targetSize: '+progress.targetSize);
+					})
+					.on('error', function(err) {
+						console.log('An error occurred: ' + err.message);
+						$("#video"+Numero).html('video'+Numero+'\nHa ocurrido un error: ' + err.message).addClass("bg-danger").removeClass("dashed");
+					})
+					.on('end', function() {
+						console.log('Processing finished !');
+						$("#video"+Numero).html('Descarga finalizada! video'+Numero+'.mp4').addClass("bg-success").removeClass("dashed");
+					});
+				command.save('videos/video'+Numero+'.mp4');
+			});
+
+			$("#limpiar").on("click", function(){
+				$(".bg-success, .bg-danger").remove();
+			});
+		});
+	</script>
+</body>
 </html>
