@@ -1,81 +1,117 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-	<meta charset="UTF-8">
-	<title>Document</title>
-	<link rel="stylesheet" href="assets/stylesheets/estilo.css">
-	<link rel="stylesheet" href="assets/stylesheets/bootstrap.min.css">
-</head>
-<body>
-	<center>
-		<h3>M3DU Downloader</h3>
-	</center>
-	<table style="width:100%">
-		<tr>
-			<td style="width:95px">
-				<label>M3U8 URL:<label>
-			</td>
-			<td>
-				<input type="text" id="url" class="form-control">
-			</td>
-		</tr>
-		<tr>
-			<td>
-				<label>Numero</label>
-			</td>
-			<td>
-				<input type="text" id="numero" class="form-control">
-			</td>
-		</tr>
-	</table>
-	<br>
-	<button id="convertir" class="btn btn-success">DESCARGAR</button>
-	<button id="limpiar" class="btn btn-primary">LIMPIAR</button>
-	<div>
-		<div id="result"></div>
-	</div>
-	<script type="text/javascript" src="assets/javascripts/jquery-2.1.4.min.js"></script>
-	<script type="text/javascript">
-		var ffmpeg = require('fluent-ffmpeg');
-		var command = ffmpeg();
-		
-		$(function(){
-			$("#convertir").on("click", function()
-			{
-				var URL 	= $("#url").val();
-				var Numero 	= $("#numero").val();
 
-				$("#url").val("");
-				$("#numero").val(parseInt(Numero)+1);
-				$("#result").append("<div id='video"+Numero+"' class='video-item dashed'>Inicio de descarga</div>");
+    <!DOCTYPE html>
+    <html>
+        <style type="text/css">
+            html, body {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background-color: #000000;
+                overflow: hidden;
+                position: fixed;
 
-				var command = ffmpeg(URL)
-					.videoCodec('libx264')
-  					.audioCodec('libmp3lame')
-					.format('mp4')
-					.on('start', function(commandLine) {
-						console.log('Spawned Ffmpeg with command: ' + commandLine);
-					})
-					.on('progress', function(progress) {
-						console.log('Processing: ' + progress.percent + '% done');
-						$("#video"+Numero).html('Descargando: video'+Numero+" "+progress.percent.toFixed(2)+'% <span></span>');
-						$("#video"+Numero+" span").html('targetSize: '+progress.targetSize);
-					})
-					.on('error', function(err) {
-						console.log('An error occurred: ' + err.message);
-						$("#video"+Numero).html('video'+Numero+'\nHa ocurrido un error: ' + err.message).addClass("bg-danger").removeClass("dashed");
-					})
-					.on('end', function() {
-						console.log('Processing finished !');
-						$("#video"+Numero).html('Descarga finalizada! video'+Numero+'.mp4').addClass("bg-success").removeClass("dashed");
-					});
-				command.save('videos/video'+Numero+'.mp4');
-			});
+            }
 
-			$("#limpiar").on("click", function(){
-				$(".bg-success, .bg-danger").remove();
-			});
-		});
-	</script>
-</body>
-</html>
+        </style>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        </head>
+        <body>
+
+
+            <!-- Load Facebook SDK for JavaScript -->
+            <script>
+
+                var facebookPlayerBridge = window.FacebookPlayerBridge;
+                var my_video_player;
+
+                window.fbAsyncInit = function() {
+                  FB.init({
+                    appId      : '{your-app-id}',
+                    xfbml      : true,
+                    version    : 'v3.2'
+                  });
+
+                  // Get Embedded Video Player API Instance
+                  FB.Event.subscribe('xfbml.ready', function(msg) {
+                    if (msg.type === 'video') {
+                       my_video_player = msg.instance;
+                       facebookPlayerBridge.isReadyCallback();
+
+                       my_video_player.subscribe('startedPlaying', function(e) {
+                          facebookPlayerBridge.updateDuration(my_video_player.getDuration());
+                          facebookPlayerBridge.startedPlayingCallback();
+                       });
+                       my_video_player.subscribe('paused', function(e) {
+                          facebookPlayerBridge.pausedCallback();
+                       });
+                       my_video_player.subscribe('finishedPlaying', function(e) {
+                          facebookPlayerBridge.finishedPlayingCallback();
+                       });
+                       my_video_player.subscribe('startedBuffering', function(e) {
+                          facebookPlayerBridge.startedBufferingCallback();
+                       });
+                       my_video_player.subscribe('finishedBuffering', function(e) {
+                          facebookPlayerBridge.finishedBufferingCallback();
+                       });
+                       my_video_player.subscribe('error', function(e) {
+                          facebookPlayerBridge.errorCallback();
+                       });
+
+
+                    }
+                  });
+                };
+
+                function play() {
+                    my_video_player.play();
+                }
+
+                function pause() {
+                    my_video_player.pause();
+                }
+
+                function seek(seconds) {
+                    my_video_player.seek(seconds);
+                }
+
+                function mute() {
+                    my_video_player.mute();
+                    facebookPlayerBridge.setIsMuted(true)
+                }
+
+                function unMute() {
+                    my_video_player.unmute();
+                    facebookPlayerBridge.setIsMuted(false)
+                }
+
+               function isMuted() {
+                   facebookPlayerBridge.isMutedResult(my_video_player.isMuted());
+               }
+
+               function setVolume(volume) {
+                    my_video_player.setVolume(volume);
+                    facebookPlayerBridge.setVolumeCallback(volume)
+                }
+
+
+               function getCurrentPosition() {
+                   facebookPlayerBridge.getCurrentPositionResult(my_video_player.getCurrentPosition());
+               }
+
+            </script>
+            <!-- Load Facebook SDK for JavaScript -->
+            <div id="fb-root"></div>
+            <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
+
+            <!-- Your embedded video player code -->
+            <div class="fb-video" data-href="{video-url}" data-width="100%"
+                    style="
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: inherit;">
+            </div>
+        </body>
+    </html>
